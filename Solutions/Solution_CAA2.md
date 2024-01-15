@@ -115,6 +115,8 @@ To describe the ADT, it must also be taken into account that a contract should h
 - @pre true.
 - @post if the role code is new, the roles will remain the same plus a new role with the indicated data. If not, the role data will have been updated with the new data.
 
+SOLUTION:
+
 1. addRole(roleId, description)
    - @pre the role exists.
    - @post if the employee's ID is new, the employees will remain the same plus a new employee; the number of employees will be the same plus one, and the number of employees in a role will be the same plus one. If not, the employee data will have been updated with the new data, and if the role is modified, the number of employees in the old role will be the same minus one, and the number of employees in the new role will be the same plus one.
@@ -176,24 +178,32 @@ Next, we will design the associated data structures , based on the CTTCompaniesJ
 
 We hesitate between using a vector, an AVL, a linked list or a hash table to store the workers . Justify which you think is the best option.
 
+SOLUTION:
+
 - The best option is an AVL since the number of workers becomes very large and unlimited. With a list, search operations would be linear, and with large volumes of information, it is not acceptable. A hash table is also not suitable if the information we want to store is not limited. We choose an AVL, which will provide logarithmic costs for queries and allow us to work with very large and unlimited volumes of information
 
 ### Section 2-B
 
 What structure would be ideal for storing substitute entries : a queue, a stack or a list? Justify which you think is the best option.
 
+SOLUTION:
+
 - As substitute registrations must be stored according to a specific criterion, the criterion for substitute registrations is based on the worker's level, leading us to choose a priority queue
 
 ### Section 2-C
 
 What structure would be ideal to store CTT employees , an AVL, a linked list or a hash table?
-Justify which you think is the best option and what specific structure you would use taking into account that the searches will be carried out by ID .
+Justify which you think is the best option and what specific structure you would use taking into account that the searches will be carried out by ID.
+
+SOLUTION:
 
 - As the volume of data is large, we discard using a vector or list, and we must choose between an AVL tree and a hash table. Since we are informed that the number of employees is known and large, we will choose a hash table to achieve constant query access through the employee's ID.
 
 ### Section 2-D
 
 What data structure would you use to store the rooms ? And for the equipments ? Justify which you think is the best option in each case.
+
+SOLUTION:
 
 - Rooms: We know that, like employees, the number of organizing entities will be very large and known. With this information, we can determine that the best choice would be a hash table, which would guarantee efficient access.
 
@@ -203,6 +213,8 @@ What data structure would you use to store the rooms ? And for the equipments ? 
 
 Justify each and every one of the data structures to store the rest of the elements , taking into account everything discussed in the statement and in the description of the operations. Only for mandatory operations (1-13). To do this, it is necessary to use the following format:
 "To save XXX we choose an ordered linked list since the number of elements is not very large, and we need ordered traversals."
+
+SOLUTION:
 
 1. For companies, we will choose a hash table since the container size will be large but stable, and efficient access is desired.
 2. For requests, we choose an unbounded queue since they are taken in the order of arrival, and their size is indeterminate.
@@ -224,13 +236,71 @@ Justify each and every one of the data structures to store the rest of the eleme
 
 ### Section 2-F
 
-Indicate additional data structures to implement operations (14-18) justifying your choice briefly (max 2 paragraphs) .
+Indicate additional data structures to implement operations (14-18) justifying your choice briefly (max 2 paragraphs).
+
+SOLUTION:
 
 - To store the relationship between followers and followed employees, a directed graph will be used. To provide the list of employees assigned to the same rooms and those who are not followed, it is necessary for the employee to maintain the list of rooms to which they are assigned through a linked list. The alternative would be to traverse all rooms and the employees assigned to these rooms, which would not be scalable
 
 ### Section 2-G
 
 Make a graphical representation of the global data structure by the CTTCompaniesJobs ADT where the data structures chosen to represent each of the parts and the relationships between them are seen. You must represent the complete structure, with all the structures that allow you to implement the operations defined in the specification.
+
+SOLUTION:
+
+Graph Structure and Relationships:
+
+1. JobOffers: AVL
+   - Connected to:
+     - Enrollments: Queue Linked
+     - substituteEnrollments: Priority Queue
+
+2. Ratings: Linked List
+   - Connected to:
+     - JobOffers: AVL (as noted above)
+
+3. Employees: Hash table
+   - Connected to:
+     - Rooms: Chained Linked List
+
+4. Rooms: Hash table
+   - Connected to:
+     - Materials: Chained Linked List
+     - Employees: Chained Linked List
+
+5. Companies: Hash table
+   - Connected to:
+     - Job offers: Linked List
+
+6. Workers: AVL
+   - Connected to:
+     - job offers: linked list
+       - Attributes:
+         - workingDays: int
+         - level
+
+7. Employees: Social network, Directed graph
+   - (Not connected to other nodes in the provided image)
+
+8. Roles: Vector
+   - Connected to:
+     - employees: Linked List
+
+9. Request: Queue
+   - Attributes:
+     - numTotalRequest: int
+     - numRejectedRequest: int
+
+10. Worker most active: pointer (Not connected to other nodes in the provided image)
+
+11. bestJobOffers: Ordered vector (Not connected to other nodes in the provided image)
+
+12. equippedRooms: ordered vector
+    - Connected to:
+      - roomsWithoutEmployees: linked list
+
+13. equipments: AVL
+    - Connected to equippedRooms: ordered vector as part of a larger structure with roomsWithoutEmployees: linked list)
 
 ## Exercise 3
 
@@ -246,6 +316,8 @@ Describe and carry out the efficiency study for the following operations:
 - Assign an employee to a room.
 
 To do so, you must briefly describe the behavior of the operation, indicating the steps that comprise it. You can use pseudocode or phrases like: "insert into vector / delete from linked list / query element in sorted linked list /...", indicating the asymptotic efficiency of each step and calculating the total efficiency of the operation.
+
+SOLUTION:
 
 1. Add a room:
    - Search for the room in the CTT's room hash table => O(1).
@@ -273,6 +345,8 @@ Note: In case the room to which the employee has been assigned was previously em
 
 Currently, no operation allows a worker to withdraw from an offer, so registrations and substitute registrations never decrease. In a real application it would be essential to have this functionality. Describe in detail what the behavior of said registration operation would be like.
 
+SOLUTION:
+
 - Firstly, it would be necessary to check whether the job offer exists. To do this, we must traverse the AVL of job offers. If the offer is not found, we should report an error. Next, we should verify that the worker who is resigning from a specific job offer indeed has a registration in that offer. To do this, we must traverse the unbounded queue of registrations and, if not found there, also the queue of substitute registrations. If the worker's registration is not found in the offer, we should report an error. Otherwise, two situations could arise:
 
   - If the registration is in the unbounded queue of registrations: In this case, upon finding the registration in this queue, we would need to:
@@ -291,6 +365,8 @@ If the registration is in the priority queue of substitute registrations: In thi
 ### Section 4-A
 
 Indicate which ADT from the ADT library <https://eimtgit.uoc.edu/DS/DSLib> seem more suitable for use in the implementation of each of the data structures defined by the CTTCompaniesJobs ADT for operations 1-13 . If there is no implementation already made in the ADT library of the subject, briefly indicate how you would implement it.
+
+SOLUTION:
 
 - Workers: DictionaryAVLImpl.
 - Job Offers of a Company: Linked List.
@@ -319,6 +395,8 @@ Indicate which ADT from the ADT library <https://eimtgit.uoc.edu/DS/DSLib> seem 
 ### Section 4-B
 
 Indicate which ADT from the subject's ADT library you think is most appropriate for use in the implementation of each of the data structures defined by the CTTCompaniesJobs ADT for operations options 14-18 . If there is no implementation already made in the ADT library of the subject, briefly comment on how you would implement it.
+
+SOLUTION:
 
 - Rooms Assigned to an Employee: Linked List
 - Social Network among Employees: DirectedGraphImpl.
